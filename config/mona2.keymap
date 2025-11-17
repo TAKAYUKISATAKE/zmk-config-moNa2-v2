@@ -40,12 +40,6 @@
             key-positions = <2 3>;
         };
 
-        Function {
-            bindings = <&lt 1 RIGHT_SHIFT>;
-            key-positions = <18 17 18>;
-            layers = <1>;
-        };
-
         copy {
             bindings = <&kp LC(C)>;
             key-positions = <12 11>;
@@ -74,6 +68,11 @@
         win+v {
             bindings = <&kp LG(V)>;
             key-positions = <24 23>;
+        };
+
+        Function {
+            bindings = <&lt 1 F2>;
+            key-positions = <17 18>;
         };
     };
 
