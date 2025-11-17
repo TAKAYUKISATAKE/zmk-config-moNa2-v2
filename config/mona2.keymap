@@ -43,6 +43,7 @@
         Function {
             bindings = <&lt 1 RIGHT_SHIFT>;
             key-positions = <18 17 18>;
+            layers = <1>;
         };
 
         copy {
@@ -140,7 +141,7 @@
             bindings = <
 &trans             &trans         &kp LG(LC(LEFT_ARROW))  &kp LG(LC(RIGHT_ARROW))  &kp LG(TAB)                                         &trans  &trans  &trans  &trans  &trans
 &kp LG(LC(T))      &kp LS(LC(A))  &kp LA(LG(SPACE))       &kp LA(SPACE)            &kp LC(LS(V))                               &trans  &trans  &trans  &trans  &trans  &trans
-&trans             &trans         &trans                  &trans                   &trans                 &sleep_macro         &trans  &trans  &trans  &trans  &trans  &trans
+&trans             &trans         &trans                  &trans                   &trans                 &trans               &trans  &trans  &trans  &trans  &trans  &trans
 &kp LS(LC(LG(Y)))  &trans         &trans                  &trans                   &kp LS(LA(LC(LG(A))))  &kp LS(LC(LG(P)))    &trans  &trans                          &trans
             >;
 
