@@ -197,7 +197,7 @@
             bindings = <
 &trans  &trans  &trans  &trans  &trans                    &trans  &kp LA(LS(TAB))  &kp LA(TAB)  &trans  &trans
 &trans  &trans  &trans  &trans  &trans            &trans  &trans  &kp LC(LS(TAB))  &kp LC(TAB)  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans           &trans       &trans  &trans
+&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &kp LS(A)        &trans       &trans  &trans
 &trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans                                        &trans
             >;
 
