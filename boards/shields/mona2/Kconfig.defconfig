@@ -21,6 +21,15 @@ config SPI
 config PMW3610
     default y
 
+config BT_CTLR_PHY_2M
+    default n
+
+config ZMK_IDLE_TIMEOUT
+    default 120000
+
+config ZMK_IDLE_SLEEP_TIMEOUT
+    default 3600000
+
 endif
 
 if SHIELD_MONA2_R || SHIELD_MONA2_L
