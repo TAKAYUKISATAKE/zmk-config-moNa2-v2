@@ -143,8 +143,8 @@ layers:
   - {t: ▽, type: trans}
   - Gui+LEFT ARROW
   - Gui+RIGHT ARROW
-  - Ctl+Gui+LEFT ARROW
-  - Ctl+Gui+RIGHT ARROW
+  - '&host_key LC(LG(LEFT_ARROW)) LG(LS(TAB))'
+  - '&host_key LC(LG(RIGHT_ARROW)) LG(TAB)'
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - LEFT ARROW
