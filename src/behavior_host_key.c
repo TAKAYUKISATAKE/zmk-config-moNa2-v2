@@ -2,9 +2,11 @@
 
 #define DT_DRV_COMPAT mona_behavior_host_key
 
+#include <string.h>
 #include <zephyr/device.h>
 #include <zephyr/kernel.h>
 #include <drivers/behavior.h>
+#include <dt-bindings/zmk/keys.h>
 #include <zmk/endpoints.h>
 #include <zmk/events/keycode_state_changed.h>
 
@@ -81,6 +83,36 @@ static int host_key_pressed(struct zmk_behavior_binding *binding,
 static int host_key_released(struct zmk_behavior_binding *binding,
                              struct zmk_behavior_binding_event event) {
     return host_key_event(binding, event, false);
+}
+
+/* Existing DYA combos and macro steps can already contain &kp Ctrl+Win+Arrow.
+ * Switch their output without consuming combo slots or changing saved bindings.
+ * Match only a single encoded shortcut; ordinary arrows/modifier taps pass through.
+ */
+int __real_zmk_behavior_invoke_binding(const struct zmk_behavior_binding *binding,
+                                       struct zmk_behavior_binding_event event, bool pressed);
+
+int __wrap_zmk_behavior_invoke_binding(const struct zmk_behavior_binding *binding,
+                                       struct zmk_behavior_binding_event event, bool pressed) {
+    if (binding->behavior_dev &&
+        strcmp(binding->behavior_dev, DEVICE_DT_NAME(DT_NODELABEL(kp))) == 0) {
+        uint32_t apple;
+        switch (binding->param1) {
+        case LC(LG(LEFT_ARROW)):
+            apple = LG(LS(TAB));
+            break;
+        case LC(LG(RIGHT_ARROW)):
+            apple = LG(TAB);
+            break;
+        default:
+            return __real_zmk_behavior_invoke_binding(binding, event, pressed);
+        }
+
+        struct zmk_behavior_binding routed = *binding;
+        routed.param2 = apple;
+        return host_key_event(&routed, event, pressed);
+    }
+    return __real_zmk_behavior_invoke_binding(binding, event, pressed);
 }
 
 #if IS_ENABLED(CONFIG_ZMK_BEHAVIOR_METADATA)

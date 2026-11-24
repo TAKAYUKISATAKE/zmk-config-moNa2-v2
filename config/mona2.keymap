@@ -363,7 +363,7 @@
             display-name = "NAV";
             bindings = <
 &trans  &kp LC(LS(TAB))     &host_key PRINTSCREEN LG(LS(N3))  &kp LC(TAB)  &kp LC(SPACE)                                     &trans  &kp HOME        &kp UP_ARROW    &kp END          &trans
-&trans  &kp LG(LEFT_ARROW)  &kp LG(RIGHT_ARROW)     &kp LC(LG(LEFT_ARROW))   &kp LC(LG(RIGHT_ARROW))            &trans  &trans  &kp LEFT_ARROW  &kp DOWN_ARROW  &kp RIGHT_ARROW  &trans
+&trans  &kp LG(LEFT_ARROW)  &kp LG(RIGHT_ARROW)     &host_key LC(LG(LEFT_ARROW)) LG(LS(TAB))  &host_key LC(LG(RIGHT_ARROW)) LG(TAB)            &trans  &trans  &kp LEFT_ARROW  &kp DOWN_ARROW  &kp RIGHT_ARROW  &trans
 &trans  &kp LEFT_SHIFT      &kp LG(LS(LEFT_ARROW))  &kp LG(LS(RIGHT_ARROW))  &trans                   &trans    &trans  &trans  &kp DELETE      &kp PAGE_UP     &kp PAGE_DOWN    &trans
 &trans  &trans              &trans                  &trans                   &trans                   &trans    &trans  &trans                                                   &trans
             >;
