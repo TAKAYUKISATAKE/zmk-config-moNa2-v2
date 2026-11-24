@@ -76,7 +76,7 @@
        Web UI の "Reset to Default" でここの値へ戻せる。
 
        スロット総数は CONFIG_ZMK_RUNTIME_COMBO_MAX_COMBOS (現状 16)。
-       未使用スロット (2〜15) は DYA Studio から自由に追加できる。
+       未使用スロット (5〜15) は DYA Studio から自由に追加できる。
        ────────────────────────────────────────────────────────── */
     runtime_combo_defaults {
         compatible = "cormoran,runtime-combo-defaults";
@@ -91,8 +91,38 @@
         tab {
             slot = <1>;
             display-name = "Tab";
-            key-positions = <11 12>;
+            key-positions = <1 2>;
             bindings = <&kp TAB>;
+        };
+
+        copy {
+            slot = <2>;
+            display-name = "Copy (S+D)";
+            key-positions = <11 12>;
+            bindings = <&host_key LC(C) LG(C)>;
+            layers = <0>;
+            timeout-ms = <35>;
+            require-prior-idle-ms = <100>;
+        };
+
+        paste {
+            slot = <3>;
+            display-name = "Paste (D+F)";
+            key-positions = <12 13>;
+            bindings = <&host_key LC(V) LG(V)>;
+            layers = <0>;
+            timeout-ms = <35>;
+            require-prior-idle-ms = <100>;
+        };
+
+        cut {
+            slot = <4>;
+            display-name = "Cut (F+G)";
+            key-positions = <13 14>;
+            bindings = <&host_key LC(X) LG(X)>;
+            layers = <0>;
+            timeout-ms = <35>;
+            require-prior-idle-ms = <100>;
         };
     };
 
@@ -101,6 +131,18 @@
        DYA Studio から編集したいマクロは Web UI で新規作成し、
        キーに `&rmacro <slot>` を割り当てて使う。 */
     macros {
+        ime_eisu: ime_eisu {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&host_key INT_MUHENKAN LANG2>;
+        };
+
+        ime_kana: ime_kana {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&host_key INT_HENKAN LANG1>;
+        };
+
         to_layer_0: to_layer_0 {
             compatible = "zmk,behavior-macro-one-param";
             #binding-cells = <1>;
@@ -166,6 +208,37 @@
     };
 
     behaviors {
+        host_key: host_key {
+            compatible = "mona,behavior-host-key";
+            #binding-cells = <2>;
+            display-name = "Host Key (Windows / Apple)";
+        };
+
+        nav_eisu: nav_eisu {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            display-name = "NAV / Eisu";
+            tapping-term-ms = <200>;
+            bindings = <&mo>, <&ime_eisu>;
+        };
+
+        nav_kana: nav_kana {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            display-name = "NAV / Kana";
+            tapping-term-ms = <200>;
+            bindings = <&mo>, <&ime_kana>;
+        };
+
+        hold_bt_clear: hold_bt_clear {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            display-name = "Hold to Clear Bluetooth";
+            tapping-term-ms = <1200>;
+            flavor = "tap-preferred";
+            bindings = <&bt>, <&none>;
+        };
+
         lt_to_layer_0: lt_to_layer_0 {
             compatible = "zmk,behavior-hold-tap";
             label = "LAYER_TAP_TO_0";
@@ -256,7 +329,7 @@
 &kp Q             &kp W         &kp E    &kp R          &kp T                                                          &kp Y        &kp U  &kp I      &kp O    &kp P
 &kp A             &kp S         &kp D    &kp F          &kp G                                  &kp F13                 &kp H        &kp J  &kp K      &kp L    &kp SEMICOLON
 &mt LEFT_SHIFT Z  &kp X         &kp C    &kp V          &kp B        &kp F14                   &kp F15                 &kp N        &kp M  &kp COMMA  &kp DOT  &kp SLASH
-&kp LCTRL         &kp LEFT_WIN  &kp F16  &kp BACKSPACE  &lt 2 ENTER  &lt_to_layer_0 3 LANG2    &lt_to_layer_0 3 LANG1  &lt 1 SPACE                             &kp LEFT_ALT
+&host_key LCTRL LGUI  &host_key LGUI LCTRL  &kp F16  &kp BACKSPACE  &lt 2 ENTER  &nav_eisu 3 0  &nav_kana 3 0  &lt 1 SPACE                             &kp LEFT_ALT
             >;
 
             sensor-bindings = <&rsr_default>;
@@ -289,7 +362,7 @@
         layer_3 {
             display-name = "NAV";
             bindings = <
-&trans  &kp LC(LS(TAB))     &kp PRINTSCREEN         &kp LC(TAB)              &trans                                     &trans  &kp HOME        &kp UP_ARROW    &kp END          &trans
+&trans  &kp LC(LS(TAB))     &host_key PRINTSCREEN LG(LS(N3))  &kp LC(TAB)  &kp LC(SPACE)                                     &trans  &kp HOME        &kp UP_ARROW    &kp END          &trans
 &trans  &kp LG(LEFT_ARROW)  &kp LG(RIGHT_ARROW)     &kp LC(LG(LEFT_ARROW))   &kp LC(LG(RIGHT_ARROW))            &trans  &trans  &kp LEFT_ARROW  &kp DOWN_ARROW  &kp RIGHT_ARROW  &trans
 &trans  &kp LEFT_SHIFT      &kp LG(LS(LEFT_ARROW))  &kp LG(LS(RIGHT_ARROW))  &trans                   &trans    &trans  &trans  &kp DELETE      &kp PAGE_UP     &kp PAGE_DOWN    &trans
 &trans  &trans              &trans                  &trans                   &trans                   &trans    &trans  &trans                                                   &trans
@@ -303,8 +376,8 @@
             bindings = <
 &trans  &trans  &trans  &trans  &trans                         &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4
 &trans  &trans  &trans  &trans  &trans            &trans       &trans        &trans        &trans        &trans        &trans
-&trans  &trans  &trans  &trans  &trans  &trans    &bootloader  &trans        &trans        &trans        &trans        &bt BT_CLR
-&trans  &trans  &trans  &trans  &trans  &trans    &trans       &trans                                                  &bt BT_CLR_ALL
+&trans  &trans  &trans  &trans  &trans  &trans    &bootloader  &trans        &trans        &trans        &trans        &hold_bt_clear BT_CLR 0
+&trans  &trans  &trans  &trans  &trans  &trans    &trans       &trans                                                  &hold_bt_clear BT_CLR_ALL 0
             >;
 
             sensor-bindings = <&rsr_default>;

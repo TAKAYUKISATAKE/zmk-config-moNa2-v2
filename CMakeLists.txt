@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: MIT
+
+if(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+  target_sources(app PRIVATE src/behavior_host_key.c)
+endif()

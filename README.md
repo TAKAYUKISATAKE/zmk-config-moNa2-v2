@@ -16,8 +16,8 @@ DYA Studio は ZMK Studio をベースに、
 
 1. 本リポジトリをビルドし、生成された `mona2_r-...uf2`（中央側＝右手）と `mona2_l-...uf2`（周辺側＝左手）をそれぞれの XIAO BLE に書き込みます。
 2. 中央側（右手）を **USB ケーブル** で PC に接続します。
-3. Chrome / Edge などの WebUSB 対応ブラウザで **[https://studio.dya.cormoran.works/](https://studio.dya.cormoran.works/)** を開きます。
-4. DYA Studio 側で「Connect」を押し、USB デバイスとして `mona2` を選択します。このブランチでは Studio ロックを無効にしているため、アンロック操作は不要です。
+3. Chrome / Edge などの Web Serial 対応ブラウザで **[https://studio.dya.cormoran.works/](https://studio.dya.cormoran.works/)** を開きます。
+4. DYA Studio 側で「USB で接続」を押し、シリアルポートとして `mona2` を選択します。このブランチでは Studio ロックを無効にしているため、アンロック操作は不要です。
 5. キーマップ／マクロ／コンボ／トラックボール設定を編集できます。
 
 このブランチは `main` の 7 レイヤー（`BASE`、`NUM`、`SYM`、`NAV`、`BLE`、`MOUSE`、`SCROLL`）を使用します。[キーマップ図](keymap-drawer/mona2.svg)を参照してください。
@@ -32,20 +32,54 @@ DYA Studio は ZMK Studio をベースに、
 
 キーマップ側にはすでに `#include <behaviors/runtime_macro.dtsi>` を入れてあるので、`&rmacro` は最初から選択できます。
 
-`&BT0`、`&screenshot`、`&henkan` などの静的マクロ定義は残っていますが、`main` から移植した配列には割り当てていません。内容を編集したい場合は、DYA Studio 側でランタイムマクロとして作成してください。
+#### 保存済みのコピペマクロも接続先に合わせる
+
+保存済みマクロのスロット番号・割り当ては変えず、マクロの中の該当するステップだけ変更します。DYA Studio のマクロ編集画面で、`Ctrl+C` などのキー送信を **Host Key (Windows / Apple)** のタップに置き換え、両方のキーを選びます。
+
+| 操作 | Windows / USB / BT 5 | Apple / BT 2〜4 |
+| --- | --- | --- |
+| コピー | `Ctrl+C` | `⌘C` |
+| 貼り付け | `Ctrl+V` | `⌘V` |
+| 切り取り | `Ctrl+X` | `⌘X` |
+| 全選択 / 取り消し | `Ctrl+A` / `Ctrl+Z` | `⌘A` / `⌘Z` |
+
+`Ctrl 押下 → C タップ → Ctrl 解放` のような3ステップは、この動作の1タップに置き換えます。それ以外の手順や待機時間は維持します。固定の `Ctrl` が入った既存マクロを、ファームウェアが自動で書き換えることはありません。静的定義の `&BT0`、`&BT1`、`&screenshot`、`&henkan` も互換用に残しています。
 
 ### コンボを DYA Studio から使う
 
-コンボは [zmk-feature-runtime-combo](https://github.com/cormoran/zmk-feature-runtime-combo) に移行済みです。
+コンボは [zmk-feature-runtime-combo](https://github.com/cormoran/zmk-feature-runtime-combo) で編集できます。`config/mona2.keymap` の既定値は次の通りです（キー名は BASE 上の表記）。
 
-`config/mona2.keymap` の `runtime_combo_defaults` ノードが **コンパイル時デフォルト**（フラッシュ直後から有効・設定消去でも復活）で、現状は次の 2 つが入っています。
+| スロット | 操作 | 同時押し | 反応するレイヤー |
+| --- | --- | --- | --- |
+| 0 | BLE（短押しでは Esc） | 位置 38 + 39 | 全レイヤー |
+| 1 | Tab | W + E | 全レイヤー |
+| 2 | コピー | S + D | BASE |
+| 3 | 貼り付け | D + F | BASE |
+| 4 | 切り取り | F + G | BASE |
 
-| スロット | 内容 | キー位置 |
+2〜4 は誤入力を減らすため、直前の打鍵から 100 ms 以上空け、35 ms 以内に2キーを押します。スロット 5〜15 は既定で空きです。
+
+**更新時は保存済みのコンボが優先されます。** 旧設定の `S+D → Tab` がスロット 1 に保存されている場合は、先にスロット 1 だけを **Reset to Default** で `W+E` に戻してください。スロット 2〜4 に自分の設定がある場合は、必要に応じて空きスロットへ移してから、対象スロットだけを更新します。同じ同時押しを他のスロットにも登録しないでください。全設定を初期化する必要はありません。
+
+### Bluetooth で Windows / Apple を切り替える
+
+BLE レイヤー（位置 38 + 39 のコンボを長押し）の右上段で選びます。ZMK の `BT_SEL` は0始まりですが、下の表は1始まりです。
+
+| スロット | ホスト | 選択キー（BASE 表記） |
 | --- | --- | --- |
-| 0 | `&lt 4 ESC` | 38, 39 |
-| 1 | `&kp TAB` | 11, 12 |
+| 1 | Windows | Y |
+| 2 | Mac | U |
+| 3 | iPad | I |
+| 4 | iPhone | O |
+| 5 | 予備（Windows 側の動作） | P |
 
-スロットは全部で 16 個 (`CONFIG_ZMK_RUNTIME_COMBO_MAX_COMBOS`) あるので、残り 14 個は DYA Studio から自由に追加できます。既存スロットを Studio 上で書き換えた場合は、Web UI の **Reset to Default** でここの値へ戻せます。
+- 実際の HID 出力先が BLE の 2〜4 のときだけ Apple 用になります。OSの推測やレイヤーの切替はしません。USB でタイピング中は Windows 側の動作です。BLE の試験は USB を外して行ってください。
+- BASE 左下の Ctrl と Windows の位置は、Apple ではそれぞれ `⌘` と `Ctrl` になります。
+- 親指の英数・かなは、短押しで Windows では無変換・変換、Apple では英数・かな（`LANG2`・`LANG1`）を送信します。長押しは従来どおり NAV。Windows の Microsoft IME で必要に応じて、［キーとタッチのカスタマイズ］から無変換を IME オフ、変換を IME オンに割り当ててください。iPad / iPhone で英数・かなが個別に効かない場合は、NAV の `T` が `Ctrl+Space`（入力ソース切替）です。
+- NAV の `E` は Windows で `Print Screen`、Apple で `⌘⇧3`。iPhone では外部キーボードからの動作は未確認です。
+- BLE の `/`（選択中のペアリング消去）と右端の親指キー（全消去）は、短押しでは何もせず、**1.2秒の長押し**で実行します。既存のペアリングを移動したり消去する必要はありません。別の番号に登録済みなら、番号を確認してから必要なスロットだけを再ペアリングしてください。
+
+更新前は DYA Studio で既存のキーマップ・マクロ・コンボをエクスポートまたは控えてください。通常の右手用 UF2 を使い、ペアリングや保存設定を維持したい場合は `settings_reset` を使わないでください。保存済みの個別キーが既定値を上書きしている場合も、該当キーだけを確認・修正してください。
 
 ### このリポジトリで対応済みの内容
 
@@ -106,9 +140,9 @@ DYA Studio の診断ページには専用モジュールが必要なパネルが
 
 ### OS ごとのデフォルトレイヤー
 
-このブランチではレイヤー 0 (`BASE`) を Windows / macOS 共通で使います。
+接続先別ショートカットはレイヤー設定を変更しません。このブランチではレイヤー 0 (`BASE`) を全端末で共通に使います。
 レイヤー 1 は数字用 (`NUM`) なので、OS ごとのベースレイヤーに指定しないでください。
-以前の DYA 版で MAC 用にレイヤー 1 を保存していた場合は、DYA Studio の
+BLE の各スロットの割り当ては未設定または 0 で使います。以前の DYA 版で Mac 用にレイヤー 1 を保存していた場合は、DYA Studio の
 「OSごとのデフォルトレイヤー」で割り当てを解除するか 0 に戻してください。
 
 > os-detection 自身の `CONFIG_ZMK_OS_DETECTION_LAYER_*` による自動切替は
