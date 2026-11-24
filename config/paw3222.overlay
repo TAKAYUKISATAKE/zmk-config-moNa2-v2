@@ -25,3 +25,16 @@
     /delete-property/ y-input-code;
     /delete-property/ settings-id;
 };
+
+/* COROPIT (PMW3610) 向けの調整は適用せず、従来の軸と倍率を保持。 */
+&mouse_runtime_input_processor {
+    /delete-property/ y-invert;
+};
+
+&scroll_runtime_input_processor {
+    /delete-property/ y-invert;
+};
+
+&trackball_central_listener {
+    input-processors = <&mg &mouse_runtime_input_processor &scroll_runtime_input_processor &zip_scroll_scaler 1 100 &inertial_scroll>;
+};
