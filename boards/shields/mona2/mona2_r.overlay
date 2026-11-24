@@ -68,7 +68,7 @@
         reg = <0>;
         spi-max-frequency = <2000000>;
         irq-gpios = <&gpio0 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
-        cpi = <600>;
+        cpi = <500>;
         evt-type = <INPUT_EV_REL>;
         x-input-code = <INPUT_REL_X>;
         y-input-code = <INPUT_REL_Y>;
@@ -85,14 +85,15 @@
     x-codes = <INPUT_REL_X>;
     y-codes = <INPUT_REL_Y>;
     xy-to-scroll-enabled;
-    /* active-layers は config/mona2.keymap で NAV (レイヤー 3) に設定。 */
+    /* SCROLL は旧 update と同じレイヤー 5。 */
+    active-layers = <0x00000020>;
     y-invert; /* カーソル用の Y 反転をスクロールでは打ち消す。 */
     scale-multiplier = <1>;
     scale-divisor = <1>;   /* Studio UI の倍率がそのまま実効値 (1.0x基準)。固定減速は listener 側 zip_scroll_scaler */
 };
 
 &mouse_runtime_input_processor {
-    /* COROPIT: センサーで X/Y を反転し、カーソルでは main と同じく Y を戻す。 */
+    /* COROPIT: センサーで X/Y を反転し、カーソルでは旧 update と同じく Y を戻す。 */
     y-invert;
 };
 

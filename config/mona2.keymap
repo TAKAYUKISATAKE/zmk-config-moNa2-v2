@@ -53,10 +53,6 @@
     quick-tap-ms = <0>;
 };
 
-&lt {
-    quick-tap-ms = <300>;
-    flavor = "balanced";
-};
 
 &msc {
     delay-ms = <0>;
@@ -65,34 +61,28 @@
 };
 
 / {
-    /* ─────────────────────────────────────────────────────────────
-       コンボ (DYA Studio から編集可能)
-
-       旧 `combos { compatible = "zmk,combos"; }` はコンパイル時固定で
-       DYA Studio から編集できないため、zmk-feature-runtime-combo の
-       「コンパイル時デフォルト」ノードへ移行した。
-       ここに書いた内容はフラッシュ直後から有効で、設定を消しても復活する。
-       DYA Studio 側で編集するとそのスロットだけ上書きされ、
-       Web UI の "Reset to Default" でここの値へ戻せる。
-
-       スロット総数は CONFIG_ZMK_RUNTIME_COMBO_MAX_COMBOS (現状 16)。
-       未使用スロット (5〜15) は DYA Studio から自由に追加できる。
-       ────────────────────────────────────────────────────────── */
+    /* Old update's ten combos, available for editing in DYA Studio.
+       Keep the previous DYA slots for Tab/Copy/Paste/Cut. Slots 10–15 are free. */
     runtime_combo_defaults {
         compatible = "cormoran,runtime-combo-defaults";
 
-        layer4_ESC {
+        select_all {
             slot = <0>;
-            display-name = "Layer4 ESC";
-            key-positions = <38 39>;
-            bindings = <&lt 4 ESC>;
+            display-name = "Select All (A+S)";
+            key-positions = <10 11>;
+            bindings = <&host_key LC(A) LG(A)>;
+            layers = <0 6>;
+            timeout-ms = <50>;
+            require-prior-idle-ms = <0>;
         };
 
         tab {
             slot = <1>;
-            display-name = "Tab";
+            display-name = "Tab (W+E)";
             key-positions = <1 2>;
             bindings = <&kp TAB>;
+            timeout-ms = <50>;
+            require-prior-idle-ms = <0>;
         };
 
         copy {
@@ -100,9 +90,8 @@
             display-name = "Copy (S+D)";
             key-positions = <11 12>;
             bindings = <&host_key LC(C) LG(C)>;
-            layers = <0>;
-            timeout-ms = <35>;
-            require-prior-idle-ms = <100>;
+            timeout-ms = <50>;
+            require-prior-idle-ms = <0>;
         };
 
         paste {
@@ -110,9 +99,8 @@
             display-name = "Paste (D+F)";
             key-positions = <12 13>;
             bindings = <&host_key LC(V) LG(V)>;
-            layers = <0>;
-            timeout-ms = <35>;
-            require-prior-idle-ms = <100>;
+            timeout-ms = <50>;
+            require-prior-idle-ms = <0>;
         };
 
         cut {
@@ -120,9 +108,53 @@
             display-name = "Cut (F+G)";
             key-positions = <13 14>;
             bindings = <&host_key LC(X) LG(X)>;
-            layers = <0>;
-            timeout-ms = <35>;
-            require-prior-idle-ms = <100>;
+            timeout-ms = <50>;
+            require-prior-idle-ms = <0>;
+        };
+
+        shift_tab {
+            slot = <5>;
+            display-name = "Shift+Tab (E+R)";
+            key-positions = <2 3>;
+            bindings = <&kp LS(TAB)>;
+            timeout-ms = <50>;
+            require-prior-idle-ms = <0>;
+        };
+
+        function {
+            slot = <6>;
+            display-name = "Function / Right Shift (J+K)";
+            key-positions = <17 18>;
+            bindings = <&lt 1 RIGHT_SHIFT>;
+            timeout-ms = <50>;
+            require-prior-idle-ms = <0>;
+        };
+
+        undo {
+            slot = <7>;
+            display-name = "Undo (Z+X)";
+            key-positions = <21 22>;
+            bindings = <&host_key LC(Z) LG(Z)>;
+            timeout-ms = <50>;
+            require-prior-idle-ms = <0>;
+        };
+
+        redo {
+            slot = <8>;
+            display-name = "Redo (X+C)";
+            key-positions = <22 23>;
+            bindings = <&host_key LC(Y) LG(LS(Z))>;
+            timeout-ms = <50>;
+            require-prior-idle-ms = <0>;
+        };
+
+        clipboard {
+            slot = <9>;
+            display-name = "Clipboard (C+V)";
+            key-positions = <23 24>;
+            bindings = <&kp LG(V)>;
+            timeout-ms = <50>;
+            require-prior-idle-ms = <0>;
         };
     };
 
@@ -148,6 +180,26 @@
             #binding-cells = <1>;
             bindings = <&to 0 &macro_param_1to1 &kp MACRO_PLACEHOLDER>;
             label = "TO_LAYER_0";
+        };
+
+        number00: number00 {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&kp KP_N0 &kp KP_N0>;
+            label = "NUMBER00";
+        };
+
+        sleep_macro: sleep_macro {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings =
+                <&kp LG(X)>,
+                <&macro_wait_time 20>,
+                <&kp U>,
+                <&macro_wait_time 20>,
+                <&kp S>;
+
+            label = "SLEEP_MACRO";
         };
 
         BT0: BT0 {
@@ -230,6 +282,17 @@
             bindings = <&mo>, <&ime_kana>;
         };
 
+        /* Preserve the old LEFT_ALT hold and select the IME key only on tap. */
+        henkan_alt: henkan_alt {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            display-name = "Alt / Henkan or Kana";
+            flavor = "balanced";
+            tapping-term-ms = <200>;
+            quick-tap-ms = <0>;
+            bindings = <&kp>, <&ime_kana>;
+        };
+
         hold_bt_clear: hold_bt_clear {
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;
@@ -258,7 +321,7 @@
         };
 
         // エンコーダ用 runtime-configurable sensor rotate
-        // デフォルトはスクロール (cw=SCRL_DOWN, ccw=SCRL_UP)
+        // 旧 update の回転順 (cw=SCRL_UP, ccw=SCRL_DOWN)
         // DYA Studio Web UI から レイヤーごとに cw/ccw の binding を
         // kp C_VOL_UP/DN や kp LEFT/RIGHT などへ動的変更可能
 
@@ -266,8 +329,8 @@
             compatible = "zmk,behavior-runtime-sensor-rotate";
             #sensor-binding-cells = <0>;
             tap-ms = <20>;
-            cw-binding = <&msc SCRL_DOWN>;
-            ccw-binding = <&msc SCRL_UP>;
+            cw-binding = <&msc SCRL_UP>;
+            ccw-binding = <&msc SCRL_DOWN>;
         };
 
         rsr_horizontal: rsr_horizontal {
@@ -326,49 +389,49 @@
         default_layer {
             display-name = "BASE";
             bindings = <
-&kp Q             &kp W         &kp E    &kp R          &kp T                                                          &kp Y        &kp U  &kp I      &kp O    &kp P
-&kp A             &kp S         &kp D    &kp F          &kp G                                  &kp F13                 &kp H        &kp J  &kp K      &kp L    &kp SEMICOLON
-&mt LEFT_SHIFT Z  &kp X         &kp C    &kp V          &kp B        &kp F14                   &kp F15                 &kp N        &kp M  &kp COMMA  &kp DOT  &kp SLASH
-&host_key LCTRL LGUI  &host_key LGUI LCTRL  &kp F16  &kp BACKSPACE  &lt 2 ENTER  &nav_eisu 3 0  &nav_kana 3 0  &lt 1 SPACE                             &kp LEFT_ALT
+&kp Q             &kp W         &kp E         &kp R                    &kp T                                                 &kp Y      &kp U  &kp I      &kp O    &kp P
+&mt LCTRL A       &kp S         &kp D         &kp F                    &kp G                              &kp SEMI           &kp H      &kp J  &kp K      &lt 5 L  &lt 6 MINUS
+&mt LEFT_SHIFT Z  &kp X         &kp C         &kp V                    &kp B        &lt 4 LEFT_BRACKET    &kp RIGHT_BRACKET  &kp N      &kp M  &kp COMMA  &kp DOT  &lt 3 SLASH
+&host_key LCTRL LGUI  &kp LEFT_ALT  &host_key LGUI LCTRL  &henkan_alt LEFT_ALT 0  &lt 2 SPACE  &host_key LS(CAPS) LANG2          &kp BACKSPACE      &kp ENTER                             &mt RCTRL ESCAPE
+            >;
+
+            sensor-bindings = <&rsr_default>, <&rsr_volume>;
+        };
+
+        layer_1 {
+            display-name = "FUNCTION";
+            bindings = <
+&trans             &trans         &host_key LG(LC(LEFT_ARROW)) LG(LS(TAB))  &host_key LG(LC(RIGHT_ARROW)) LG(TAB)  &host_key LG(TAB) LC(UP_ARROW)                                         &trans  &trans  &trans  &trans  &trans
+&kp LG(LC(T))      &kp LS(LC(A))  &kp LA(LG(SPACE))       &kp LA(SPACE)            &kp LC(LS(K))                               &trans  &trans  &trans  &trans  &trans  &trans
+&trans             &trans         &trans                  &trans                   &trans                 &sleep_macro         &trans  &trans  &trans  &trans  &trans  &trans
+&kp LS(LC(LG(Y)))  &trans         &trans                  &trans                   &kp LS(LA(LC(LG(A))))  &kp LS(LC(LG(P)))    &trans  &trans                          &trans
             >;
 
             sensor-bindings = <&rsr_default>;
         };
 
-        layer_1 {
+        layer_2 {
             display-name = "NUM";
             bindings = <
-&kp NUMBER_1  &kp NUMBER_2  &kp NUMBER_3      &kp NUMBER_4       &kp NUMBER_5                    &kp NUMBER_6  &kp NUMBER_7          &kp NUMBER_8           &kp NUMBER_9  &kp NUMBER_0
-&trans        &trans        &kp LEFT_BRACKET  &kp RIGHT_BRACKET  &trans                  &trans  &trans        &kp LEFT_PARENTHESIS  &kp RIGHT_PARENTHESIS  &trans        &kp BACKSLASH
-&trans        &trans        &trans            &trans             &trans        &trans    &trans  &trans        &trans                &trans                 &trans        &kp PIPE
-&trans        &trans        &trans            &trans             &trans        &trans    &trans  &trans                                                                   &trans
-            >;
-
-            sensor-bindings = <&rsr_horizontal>;
-        };
-
-        layer_2 {
-            display-name = "SYM";
-            bindings = <
-&kp EXCLAMATION  &kp AT_SIGN  &kp POUND          &kp DOLLAR  &kp PERCENT                      &kp CARET  &kp AMPERSAND  &kp ASTERISK  &kp MINUS  &kp UNDERSCORE
-&kp GRAVE        &kp TILDE    &kp DOUBLE_QUOTES  &kp SQT     &trans                  &trans   &mkp MB3   &mkp MB1       &mkp MB2      &kp EQUAL  &kp PLUS
-&kp F1           &kp F2       &kp F3             &kp F4      &kp F5       &kp F11    &kp F12  &kp F6     &kp F7         &kp F8        &kp F9     &kp F10
-&trans           &trans       &trans             &trans      &trans       &trans     &trans   &trans                                             &trans
+&kp MINUS                   &kp KP_NUMBER_7  &kp KP_NUMBER_8  &kp KP_NUMBER_9  &kp PLUS                                     &kp CARET         &kp AMPERSAND      &kp TILDE       &kp LEFT_PARENTHESIS  &kp RIGHT_PARENTHESIS
+&kp SLASH                   &kp KP_NUMBER_4  &kp KP_NUMBER_5  &kp KP_NUMBER_6  &kp ASTERISK               &kp UNDERSCORE    &kp EXCLAMATION   &kp AT_SIGN        &kp HASH        &kp DOLLAR            &kp PERCENT
+&mt LEFT_SHIFT KP_NUMBER_0  &kp KP_NUMBER_1  &kp KP_NUMBER_2  &kp KP_NUMBER_3  &kp PERIOD    &kp EQUAL    &kp SINGLE_QUOTE  &kp LEFT_BRACKET  &kp RIGHT_BRACKET  &kp LEFT_BRACE  &kp RIGHT_BRACE       &kp BACKSLASH
+&trans                      &trans           &trans           &trans           &trans        &trans       &trans            &trans                                                                     &kp PIPE
             >;
 
             sensor-bindings = <&rsr_default>;
         };
 
         layer_3 {
-            display-name = "NAV";
+            display-name = "F-KEYS";
             bindings = <
-&trans  &kp LC(LS(TAB))     &host_key PRINTSCREEN LG(LS(N3))  &kp LC(TAB)  &kp LC(SPACE)                                     &trans  &kp HOME        &kp UP_ARROW    &kp END          &trans
-&trans  &kp LG(LEFT_ARROW)  &kp LG(RIGHT_ARROW)     &host_key LC(LG(LEFT_ARROW)) LG(LS(TAB))  &host_key LC(LG(RIGHT_ARROW)) LG(TAB)            &trans  &trans  &kp LEFT_ARROW  &kp DOWN_ARROW  &kp RIGHT_ARROW  &trans
-&trans  &kp LEFT_SHIFT      &kp LG(LS(LEFT_ARROW))  &kp LG(LS(RIGHT_ARROW))  &trans                   &trans    &trans  &trans  &kp DELETE      &kp PAGE_UP     &kp PAGE_DOWN    &trans
-&trans  &trans              &trans                  &trans                   &trans                   &trans    &trans  &trans                                                   &trans
+&trans  &kp F7   &kp F8   &kp F9   &trans                    &trans  &trans  &trans  &trans  &trans
+&trans  &kp F4   &kp F5   &kp F6   &trans            &trans  &trans  &trans  &trans  &trans  &trans
+&trans  &kp F1   &kp F2   &kp F3   &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans
+&trans  &kp F10  &kp F11  &kp F12  &trans  &trans    &trans  &trans                          &trans
             >;
 
-            sensor-bindings = <&rsr_volume>;
+            sensor-bindings = <&rsr_default>;
         };
 
         layer_4 {
@@ -383,34 +446,28 @@
             sensor-bindings = <&rsr_default>;
         };
 
-        mouse {
-            display-name = "MOUSE";
-            bindings = <
-&trans  &trans    &trans    &trans    &trans                    &trans  &trans    &trans    &trans    &trans
-&trans  &mkp MB3  &mkp MB2  &mkp MB1  &trans            &trans  &trans  &mkp MB1  &mkp MB2  &mkp MB3  &trans
-&trans  &trans    &trans    &trans    &trans  &trans    &trans  &trans  &trans    &trans    &trans    &trans
-&trans  &trans    &trans    &trans    &trans  &trans    &trans  &trans                                &trans
-            >;
-
-            sensor-bindings = <&rsr_default>;
-        };
-
-        scroll {
+        layer_5 {
             display-name = "SCROLL";
             bindings = <
-&trans  &trans  &trans  &trans  &trans                    &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans            &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans                          &trans
+&trans     &trans  &trans  &trans  &trans                    &trans  &host_key LA(LS(TAB)) LG(LS(TAB))  &host_key LA(TAB) LG(TAB)  &trans  &trans
+&kp LS(A)  &trans  &trans  &trans  &trans            &trans  &trans  &kp LC(LS(TAB))  &kp LC(TAB)  &trans  &trans
+&kp LS(Z)  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans           &trans       &trans  &trans
+&trans     &trans  &trans  &trans  &trans  &trans    &trans  &trans                                        &trans
             >;
 
-            sensor-bindings = <&rsr_default>;
+            sensor-bindings = <&rsr_horizontal>;
+        };
+
+        MOUSE {
+            display-name = "MOUSE";
+            bindings = <
+&kp ASTERISK          &kp KP_NUMBER_7  &kp KP_NUMBER_8  &kp KP_NUMBER_9  &kp MINUS                    &kp DEL   &kp LEFT  &kp UP_ARROW  &kp RIGHT  &trans
+&mt LCTRL TAB         &kp KP_NUMBER_4  &kp KP_NUMBER_5  &kp KP_NUMBER_6  &kp PLUS             &trans  &kp TAB   &mkp MB1  &mkp MB3      &mkp MB2   &trans
+&mt LEFT_SHIFT SLASH  &kp KP_NUMBER_1  &kp KP_NUMBER_2  &kp KP_NUMBER_3  &kp EQUAL  &trans    &trans  &mkp MB5  &mkp MB4  &kp DOWN      &trans     &trans
+&kp COLON             &kp KP_NUMBER_0  &number00        &kp PERIOD       &trans     &trans    &trans  &trans                                       &trans
+            >;
+
+            sensor-bindings = <&rsr_horizontal>;
         };
     };
-};
-
-/* main uses the navigation layer (3) for trackball scrolling.
- * Keep the processor editable in DYA Studio. */
-&scroll_runtime_input_processor {
-    active-layers = <0x00000008>;
 };
