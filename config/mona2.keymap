@@ -376,8 +376,8 @@
             bindings = <
 &trans  &trans  &trans  &trans  &trans                         &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4
 &trans  &trans  &trans  &trans  &trans            &trans       &trans        &trans        &trans        &trans        &trans
-&trans  &trans  &trans  &trans  &trans  &trans    &bootloader  &trans        &trans        &trans        &trans        &hold_bt_clear BT_CLR 0
-&trans  &trans  &trans  &trans  &trans  &trans    &trans       &trans                                                  &hold_bt_clear BT_CLR_ALL 0
+&trans  &trans  &trans  &trans  &trans  &trans    &bootloader  &trans        &trans        &trans        &trans        &hold_bt_clear BT_CLR_CMD 0
+&trans  &trans  &trans  &trans  &trans  &trans    &trans       &trans                                                  &hold_bt_clear BT_CLR_ALL_CMD 0
             >;
 
             sensor-bindings = <&rsr_default>;
