@@ -17,9 +17,10 @@ DYA Studio は ZMK Studio をベースに、
 1. 本リポジトリをビルドし、生成された `mona2_r-...uf2`（中央側＝右手）と `mona2_l-...uf2`（周辺側＝左手）をそれぞれの XIAO BLE に書き込みます。
 2. 中央側（右手）を **USB ケーブル** で PC に接続します。
 3. Chrome / Edge などの WebUSB 対応ブラウザで **[https://studio.dya.cormoran.works/](https://studio.dya.cormoran.works/)** を開きます。
-4. キーボード側で `BLE` レイヤー(レイヤー10/11)を有効にし、右下に配置した **`&studio_unlock`** キーを押してアンロック。
-5. DYA Studio 側で「Connect」を押し、USB デバイスとして mona2 を選択。
-6. キーマップ／マクロ／コンボ／トラックボール設定を編集できます。
+4. DYA Studio 側で「Connect」を押し、USB デバイスとして `mona2` を選択します。このブランチでは Studio ロックを無効にしているため、アンロック操作は不要です。
+5. キーマップ／マクロ／コンボ／トラックボール設定を編集できます。
+
+このブランチは `main` の 7 レイヤー（`BASE`、`NUM`、`SYM`、`NAV`、`BLE`、`MOUSE`、`SCROLL`）を使用します。[キーマップ図](keymap-drawer/mona2.svg)を参照してください。
 
 ### マクロを DYA Studio から使う
 
@@ -31,7 +32,7 @@ DYA Studio は ZMK Studio をベースに、
 
 キーマップ側にはすでに `#include <behaviors/runtime_macro.dtsi>` を入れてあるので、`&rmacro` は最初から選択できます。
 
-既存の `&BT0` / `&screenshot` / `&henkan` などは従来どおりの **静的マクロ** のままで、DYA Studio からは編集できません（キーマップに直接名前で書かれているため、そのまま残しています）。編集したくなったら DYA Studio 側で同じ内容のランタイムマクロを作り直してキーを差し替えてください。
+`&BT0`、`&screenshot`、`&henkan` などの静的マクロ定義は残っていますが、`main` から移植した配列には割り当てていません。内容を編集したい場合は、DYA Studio 側でランタイムマクロとして作成してください。
 
 ### コンボを DYA Studio から使う
 
@@ -59,7 +60,7 @@ DYA Studio は ZMK Studio をベースに、
 | **DYA Studio 診断タブ用モジュール (kscan-diagnostics / input-stream / devtool) を追加** | `config/west.yml`, `config/mona2_r.conf`, `config/mona2_l.conf` |
 | **トラックボールドライバを cormoran さんの Studio RPC 対応版へ移行** | `config/west.yml`, `mona2_r.overlay`, `Kconfig.defconfig`, `mona2_r.conf` |
 | トラックボール処理を Runtime Input Processor に置換 | `boards/shields/mona2/mona2.dtsi`, `mona2_r.overlay` |
-| `&studio_unlock` を `ble_win` / `ble_mac` レイヤー右上に配置 | `config/mona2.keymap` |
+| Studio ロックを無効化し、USB 接続時にアンロック不要 | `config/mona2_r.conf` |
 | 全レイヤーに `display-name` を設定 | `config/mona2.keymap` |
 | `studio-rpc-usb-uart` snippet (中央側) / ボード名を `xiao_ble/nrf52840/zmk` へ | `build.yaml` |
 
@@ -105,15 +106,10 @@ DYA Studio の診断ページには専用モジュールが必要なパネルが
 
 ### OS ごとのデフォルトレイヤー
 
-接続先の OS（USB / BLE プロファイルごと）を判定して、起動時のデフォルトレイヤーを
-自動で切り替えられます。mona2 はベースレイヤーが 0 = `WIN` / 1 = `MAC` に分かれているので、
-選択可能な範囲を `CONFIG_ZMK_DEFAULT_LAYER_MIN_INDEX=0` /
-`CONFIG_ZMK_DEFAULT_LAYER_MAX_INDEX=1` に設定しています。
-実際の割り当ては DYA Studio の「OSごとのデフォルトレイヤー」パネルから行ってください。
-
-キーマップには `&df` behavior も入れてあるので、DYA Studio のキーマップエディタから
-`&df DF_SEL <レイヤー>`（指定レイヤーをデフォルトに）や `&df DF_INC`（次のレイヤーへ）を
-任意のキーに割り当てることもできます。
+このブランチではレイヤー 0 (`BASE`) を Windows / macOS 共通で使います。
+レイヤー 1 は数字用 (`NUM`) なので、OS ごとのベースレイヤーに指定しないでください。
+以前の DYA 版で MAC 用にレイヤー 1 を保存していた場合は、DYA Studio の
+「OSごとのデフォルトレイヤー」で割り当てを解除するか 0 に戻してください。
 
 > os-detection 自身の `CONFIG_ZMK_OS_DETECTION_LAYER_*` による自動切替は
 > default-layer モジュールと競合するため有効にしないでください。
@@ -133,17 +129,16 @@ badjeff さんの `zmk-pmw3610-driver` から
 `zmk-driver-pmw3610-with-custom-studio-rpc` へ移行しました。
 
 - devicetree の compatible が `pixart,pmw3610-alt` → **`cormoran,pmw3610`**
-- **軸の反転は devicetree プロパティではなく Kconfig になりました。**
-  `invert-x;` は `CONFIG_PMW3610_INVERT_X=y` に移動しています
-  （COROPIT 版などで Y も反転したい場合は `CONFIG_PMW3610_INVERT_Y=y`）。
+- センサー自体の軸反転の既定値は `config/mona2_r.conf` で指定します。
+  COROPIT 向けの入力処理は下記を参照してください。
 - CPI・軸反転・ダウンシフト時間などは `CONFIG_ZMK_PMW3610_CUSTOM_SETTINGS=y` により
   **DYA Studio から実行時に変更・保存できます**。
 - ドライバ実装が変わるため、カーソルの追従感やスリープ復帰の挙動が
   以前と微妙に変わる可能性があります。違和感があれば DYA Studio 側で
   CPI やダウンシフト時間を調整してみてください。
 
-PAW3222 版ビルドは従来どおり sekigon-gonnoc さんのドライバを使うため影響ありません
-（`config/paw3222.overlay` で compatible を上書きしています）。
+PAW3222 版は従来のドライバ、軸設定、スクロール倍率を維持します
+（`config/paw3222.overlay` で上書きしています）。
 
 ### 慣性スクロール
 
@@ -198,47 +193,10 @@ Zephyr は devicetree を Kconfig より **先に** 処理するため、`mona2_
 
 ---
 
-## トラックボール (COROPIT) を使用する場合
+## トラックボール (COROPIT / PMW3610)
 
-COROPITを使用する方は以下のようにコードを編集してください。
+このブランチには COROPIT 用設定が入っており、ドライバやオーバーレイを手作業で変更する必要はありません。
 
-mona2_r.overlay
-
-修正前
-```
-  trackball_central: trackball_central@0 {
-        status = "okay";
-        compatible = "pixart,pmw3610";  //トラボセンサ用のドライバとバインド
-        reg = <0>;
-        spi-max-frequency = <2000000>;
-        irq-gpios = <&gpio0 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>; //P0.02を指定(MOTION)
-        cpi = <600>;
-        //swap-xy;
-        //invert-x; //COROPIT版ではコメントアウトを外す
-        //invert-y; //COROPIT版ではコメントアウトを外す
-        evt-type = <INPUT_EV_REL>;
-        x-input-code = <INPUT_REL_X>;
-        y-input-code = <INPUT_REL_Y>;
-    };
-};
-
-```
-**修正後**
-```
-  trackball_central: trackball_central@0 {
-        status = "okay";
-        compatible = "pixart,pmw3610";  //トラボセンサ用のドライバとバインド
-        reg = <0>;
-        spi-max-frequency = <2000000>;
-        irq-gpios = <&gpio0 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>; //P0.02を指定(MOTION)
-        cpi = <600>;
-        //swap-xy;
-        invert-x; //COROPIT版ではコメントアウトを外す
-        invert-y; //COROPIT版ではコメントアウトを外す
-        evt-type = <INPUT_EV_REL>;
-        x-input-code = <INPUT_REL_X>;
-        y-input-code = <INPUT_REL_Y>;
-    };
-};
-
-```
+- センサー側で X / Y を反転し、通常のカーソル移動では入力処理側でも Y を反転します。
+- `main` と同じくレイヤー 3 (`NAV`) ではホイールに切り替わります。スクロール時はカーソル用の Y 補正を打ち消し、固定倍率は `main` と同じ `1/5` です。
+- DYA Studio からマウス・スクロール個別の軸や倍率を調整できます。本体に保存した値は、更新後もファームウェアの既定値より優先される場合があります。動きが変わらない場合は、DYA Studio で該当項目の設定を確認してください。
